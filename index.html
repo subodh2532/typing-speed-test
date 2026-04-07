@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Speed Test</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <p class="eyebrow">Performance Typing</p>
+        <h1>Typing Speed Test</h1>
+      </div>
+      <div class="topbar-actions">
+        <button id="themeToggle" class="icon-button" type="button" aria-label="Toggle light and dark mode">
+          <span class="theme-icon" aria-hidden="true">&#9728;</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-layout">
+      <section id="landingScreen" class="screen active card">
+        <div class="card-copy">
+          <span class="chip">Offline Ready</span>
+          <h2>Train speed, rhythm, and accuracy.</h2>
+          <p class="supporting-text">
+            Pick a difficulty, start instantly, and track your last five runs locally in your browser.
+          </p>
+        </div>
+
+        <div class="control-grid">
+          <div class="control-card">
+            <label for="difficultySelect">Difficulty</label>
+            <select id="difficultySelect">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+
+          <div class="control-card toggle-card">
+            <div>
+              <p class="toggle-title">Sound Effects</p>
+              <p class="toggle-description">Keyboard click feedback</p>
+            </div>
+            <label class="switch">
+              <input id="soundToggle" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quick-stats">
+          <article class="stat-panel">
+            <span class="stat-label">Current Streak</span>
+            <strong id="streakValue">0</strong>
+          </article>
+          <article class="stat-panel">
+            <span class="stat-label">Best Recent WPM</span>
+            <strong id="bestWpmValue">0</strong>
+          </article>
+        </div>
+
+        <button id="startButton" class="primary-button" type="button">Start Test</button>
+      </section>
+
+      <section id="testScreen" class="screen card" aria-live="polite">
+        <div class="test-header">
+          <div class="timer-block">
+            <span class="timer-label">Time Left</span>
+            <strong id="timerValue">60</strong>
+          </div>
+
+          <div class="live-stats">
+            <article class="mini-stat">
+              <span>WPM</span>
+              <strong id="wpmValue">0</strong>
+            </article>
+            <article class="mini-stat">
+              <span>Accuracy</span>
+              <strong id="accuracyValue">100%</strong>
+            </article>
+            <article class="mini-stat">
+              <span>Errors</span>
+              <strong id="errorsValue">0</strong>
+            </article>
+          </div>
+        </div>
+
+        <div class="progress-wrap" aria-label="Typing progress">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <div class="prompt-card">
+          <p class="prompt-meta">
+            <span id="difficultyBadge" class="chip chip-muted">Medium</span>
+            <span id="paragraphCounter">Paragraph 1</span>
+          </p>
+          <div id="paragraphDisplay" class="paragraph-display"></div>
+        </div>
+
+        <div class="input-block">
+          <label for="typingInput">Type here</label>
+          <textarea
+            id="typingInput"
+            rows="4"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="Your timer starts on the first keystroke..."
+          ></textarea>
+          <p class="input-hint">Keyboard only. Paste, copy, and right-click are disabled. Press Ctrl + R to restart the current test.</p>
+        </div>
+      </section>
+
+      <section id="resultScreen" class="screen card">
+        <div class="card-copy">
+          <span class="chip">Session Complete</span>
+          <h2>Your results are in.</h2>
+          <p class="supporting-text">Review your performance, keep the streak alive, and jump back in.</p>
+        </div>
+
+        <div class="results-grid">
+          <article class="result-card">
+            <span>WPM</span>
+            <strong id="finalWpm">0</strong>
+          </article>
+          <article class="result-card">
+            <span>Accuracy</span>
+            <strong id="finalAccuracy">0%</strong>
+          </article>
+          <article class="result-card">
+            <span>Errors</span>
+            <strong id="finalErrors">0</strong>
+          </article>
+          <article class="result-card">
+            <span>Time Taken</span>
+            <strong id="finalTime">0s</strong>
+          </article>
+        </div>
+
+        <div class="result-actions">
+          <button id="retryButton" class="primary-button" type="button">Retry</button>
+          <button id="newTestButton" class="secondary-button" type="button">New Test</button>
+        </div>
+
+        <section class="history-panel">
+          <div class="history-header">
+            <h3>Recent Results</h3>
+            <span>Last 5 saved locally</span>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
