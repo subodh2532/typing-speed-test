@@ -27,6 +27,7 @@ const state = {
   timeLeft: TEST_DURATION,
   isRunning: false,
   typedText: "",
+  typedEntries: [],
   mistakes: 0,
   correctChars: 0,
   currentParagraph: null,
@@ -150,6 +151,7 @@ function resetState() {
   state.timeLeft = TEST_DURATION;
   state.isRunning = false;
   state.typedText = "";
+  state.typedEntries = [];
   state.mistakes = 0;
   state.correctChars = 0;
   state.intervalId = null;
@@ -193,7 +195,7 @@ function startTimer() {
 }
 
 function calculateMetrics() {
-  const typedChars = state.typedText.length;
+  const typedChars = state.typedEntries.length;
   const elapsedSeconds = state.isRunning
     ? Math.max((Date.now() - state.startTime) / 1000, 1)
     : TEST_DURATION - state.timeLeft || 1;
@@ -224,21 +226,18 @@ function updateStats() {
 
 function updateCharacterStates() {
   const spans = elements.paragraphDisplay.querySelectorAll("span");
-  const sourceText = state.currentParagraph.text;
   let correctCount = 0;
   let mistakes = 0;
 
-  // Recalculate from scratch on every input so backspace always corrects stats.
   spans.forEach((span, index) => {
     span.className = "";
-    const expected = sourceText[index];
-    const typed = state.typedText[index];
+    const entry = state.typedEntries[index];
 
-    if (typed == null) {
+    if (!entry) {
       return;
     }
 
-    if (typed === expected) {
+    if (entry.isCorrect) {
       span.classList.add("correct");
       correctCount += 1;
     } else {
@@ -247,13 +246,21 @@ function updateCharacterStates() {
     }
   });
 
-  const currentIndex = Math.min(state.typedText.length, spans.length - 1);
+  const currentIndex = Math.min(state.typedEntries.length, spans.length - 1);
   if (spans[currentIndex]) {
     spans[currentIndex].classList.add("current");
   }
 
   state.correctChars = correctCount;
   state.mistakes = mistakes;
+}
+
+function syncTypedState() {
+  state.typedText = state.typedEntries.map((entry) => entry.typed).join("");
+  state.lastInputLength = state.typedEntries.length;
+  elements.typingInput.value = state.typedText;
+  updateCharacterStates();
+  updateStats();
 }
 
 function playKeySound() {
@@ -287,23 +294,50 @@ function playKeySound() {
   oscillator.stop(ctx.currentTime + 0.03);
 }
 
-function handleTypingInput(event) {
-  const inputValue = event.target.value.slice(0, state.currentParagraph.text.length);
+function handleTypingKeydown(event) {
+  if (!state.currentParagraph || !elements.testScreen.classList.contains("active")) {
+    return;
+  }
 
-  if (!state.isRunning && inputValue.length > 0) {
+  if ((event.ctrlKey || event.metaKey || event.altKey) && event.key !== "Backspace") {
+    return;
+  }
+
+  if (event.key === "Backspace") {
+    event.preventDefault();
+    if (state.typedEntries.length > 0) {
+      state.typedEntries.pop();
+      syncTypedState();
+    }
+    return;
+  }
+
+  if (event.key.length !== 1) {
+    return;
+  }
+
+  event.preventDefault();
+
+  if (state.typedEntries.length >= state.currentParagraph.text.length) {
+    return;
+  }
+
+  if (!state.isRunning) {
     startTimer();
   }
 
-  if (inputValue.length > state.lastInputLength) {
-    playKeySound();
-  }
+  playKeySound();
 
-  state.typedText = inputValue;
-  state.lastInputLength = inputValue.length;
-  updateCharacterStates();
-  updateStats();
+  const entryIndex = state.typedEntries.length;
+  const expectedChar = state.currentParagraph.text[entryIndex];
+  state.typedEntries.push({
+    typed: event.key,
+    expected: expectedChar,
+    isCorrect: event.key === expectedChar
+  });
+  syncTypedState();
 
-  if (state.typedText === state.currentParagraph.text) {
+  if (state.typedEntries.length === state.currentParagraph.text.length) {
     finishTest();
   }
 }
@@ -428,7 +462,10 @@ function initialize() {
     setTheme(nextTheme);
   });
 
-  elements.typingInput.addEventListener("input", handleTypingInput);
+  elements.typingInput.addEventListener("keydown", handleTypingKeydown);
+  elements.typingInput.addEventListener("input", () => {
+    elements.typingInput.value = state.typedText;
+  });
   elements.typingInput.addEventListener("paste", preventClipboardActions);
   elements.typingInput.addEventListener("copy", preventClipboardActions);
   elements.typingInput.addEventListener("cut", preventClipboardActions);
