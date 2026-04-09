@@ -7,6 +7,90 @@ const STORAGE_KEYS = {
   theme: "typing-test-theme"
 };
 
+const fingerProfiles = [
+  { id: "left-pinky", label: "Left Pinky", color: "#ff6b6b" },
+  { id: "left-ring", label: "Left Ring", color: "#f59f00" },
+  { id: "left-middle", label: "Left Middle", color: "#51cf66" },
+  { id: "left-index", label: "Left Index", color: "#339af0" },
+  { id: "right-index", label: "Right Index", color: "#845ef7" },
+  { id: "right-middle", label: "Right Middle", color: "#a61e4d" },
+  { id: "right-ring", label: "Right Ring", color: "#0b7285" },
+  { id: "right-pinky", label: "Right Pinky", color: "#5f3dc4" },
+  { id: "thumbs", label: "Thumbs", color: "#2f9e44" }
+];
+
+const keyFingerMap = {
+  "`": "left-pinky",
+  "1": "left-pinky",
+  "2": "left-ring",
+  "3": "left-middle",
+  "4": "left-index",
+  "5": "left-index",
+  "6": "right-index",
+  "7": "right-index",
+  "8": "right-middle",
+  "9": "right-ring",
+  "0": "right-pinky",
+  "-": "right-pinky",
+  "=": "right-pinky",
+  q: "left-pinky",
+  w: "left-ring",
+  e: "left-middle",
+  r: "left-index",
+  t: "left-index",
+  y: "right-index",
+  u: "right-index",
+  i: "right-middle",
+  o: "right-ring",
+  p: "right-pinky",
+  "[": "right-pinky",
+  "]": "right-pinky",
+  "\\": "right-pinky",
+  a: "left-pinky",
+  s: "left-ring",
+  d: "left-middle",
+  f: "left-index",
+  g: "left-index",
+  h: "right-index",
+  j: "right-index",
+  k: "right-middle",
+  l: "right-ring",
+  ";": "right-pinky",
+  "'": "right-pinky",
+  z: "left-pinky",
+  x: "left-ring",
+  c: "left-middle",
+  v: "left-index",
+  b: "left-index",
+  n: "right-index",
+  m: "right-index",
+  ",": "right-middle",
+  ".": "right-ring",
+  "/": "right-pinky",
+  " ": "thumbs"
+};
+
+const keyboardRows = [
+  [
+    ["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"], ["5", "5"],
+    ["6", "6"], ["7", "7"], ["8", "8"], ["9", "9"], ["0", "0"],
+    ["-", "-"], ["=", "="]
+  ],
+  [
+    ["q", "Q"], ["w", "W"], ["e", "E"], ["r", "R"], ["t", "T"],
+    ["y", "Y"], ["u", "U"], ["i", "I"], ["o", "O"], ["p", "P"]
+  ],
+  [
+    ["a", "A"], ["s", "S"], ["d", "D"], ["f", "F"], ["g", "G"],
+    ["h", "H"], ["j", "J"], ["k", "K"], ["l", "L"], [";", ";"], ["'", "'"]
+  ],
+  [
+    ["z", "Z"], ["x", "X"], ["c", "C"], ["v", "V"], ["b", "B"],
+    ["n", "N"], ["m", "M"], [",", ","], [".", "."], ["/", "/"]
+  ],
+  [[" ", "Space", "space"]]
+];
+
 const paragraphs = [
   { id: 1, difficulty: "easy", text: "Small daily habits often create the biggest improvements over time, especially when practice feels simple enough to repeat." },
   { id: 2, difficulty: "easy", text: "Reading clear words aloud can improve typing rhythm because your hands begin to follow a steady pattern." },
@@ -32,7 +116,8 @@ const state = {
   correctChars: 0,
   currentParagraph: null,
   intervalId: null,
-  lastInputLength: 0
+  lastInputLength: 0,
+  pendingInputType: null
 };
 
 const elements = {
@@ -57,6 +142,10 @@ const elements = {
   paragraphCounter: document.getElementById("paragraphCounter"),
   paragraphDisplay: document.getElementById("paragraphDisplay"),
   typingInput: document.getElementById("typingInput"),
+  nextKeyValue: document.getElementById("nextKeyValue"),
+  fingerNameValue: document.getElementById("fingerNameValue"),
+  fingerLegend: document.getElementById("fingerLegend"),
+  keyboardGuide: document.getElementById("keyboardGuide"),
   finalWpm: document.getElementById("finalWpm"),
   finalAccuracy: document.getElementById("finalAccuracy"),
   finalErrors: document.getElementById("finalErrors"),
@@ -156,6 +245,7 @@ function resetState() {
   state.correctChars = 0;
   state.intervalId = null;
   state.lastInputLength = 0;
+  state.pendingInputType = null;
 }
 
 function startNewTest(useExistingDifficulty = true) {
@@ -171,6 +261,8 @@ function startNewTest(useExistingDifficulty = true) {
   elements.typingInput.value = "";
   elements.typingInput.maxLength = state.currentParagraph.text.length;
   renderParagraph();
+  renderFingerGuide();
+  updateFingerGuide();
   updateStats();
   switchScreen(elements.testScreen);
   window.requestAnimationFrame(() => elements.typingInput.focus());
@@ -260,6 +352,7 @@ function syncTypedState() {
   state.lastInputLength = state.typedEntries.length;
   elements.typingInput.value = state.typedText;
   updateCharacterStates();
+  updateFingerGuide();
   updateStats();
 }
 
@@ -294,6 +387,38 @@ function playKeySound() {
   oscillator.stop(ctx.currentTime + 0.03);
 }
 
+function addTypedCharacter(char) {
+  if (!state.currentParagraph || state.typedEntries.length >= state.currentParagraph.text.length) {
+    return;
+  }
+
+  if (!state.isRunning) {
+    startTimer();
+  }
+
+  const expectedChar = state.currentParagraph.text[state.typedEntries.length];
+  state.typedEntries.push({
+    typed: char,
+    expected: expectedChar,
+    isCorrect: char === expectedChar
+  });
+  playKeySound();
+  syncTypedState();
+
+  if (state.typedEntries.length === state.currentParagraph.text.length) {
+    finishTest();
+  }
+}
+
+function removeTypedCharacters(count = 1) {
+  if (count <= 0) {
+    return;
+  }
+
+  state.typedEntries.splice(Math.max(state.typedEntries.length - count, 0), count);
+  syncTypedState();
+}
+
 function handleTypingKeydown(event) {
   if (!state.currentParagraph || !elements.testScreen.classList.contains("active")) {
     return;
@@ -305,10 +430,7 @@ function handleTypingKeydown(event) {
 
   if (event.key === "Backspace") {
     event.preventDefault();
-    if (state.typedEntries.length > 0) {
-      state.typedEntries.pop();
-      syncTypedState();
-    }
+    removeTypedCharacters(1);
     return;
   }
 
@@ -317,29 +439,146 @@ function handleTypingKeydown(event) {
   }
 
   event.preventDefault();
+  addTypedCharacter(event.key);
+}
 
-  if (state.typedEntries.length >= state.currentParagraph.text.length) {
+function handleBeforeInput(event) {
+  state.pendingInputType = event.inputType || null;
+}
+
+function handleTypingInput() {
+  if (!state.currentParagraph || !elements.testScreen.classList.contains("active")) {
     return;
   }
 
-  if (!state.isRunning) {
-    startTimer();
+  const domValue = elements.typingInput.value;
+  const previousValue = state.typedText;
+  const pendingInputType = state.pendingInputType;
+  state.pendingInputType = null;
+
+  if (domValue === previousValue) {
+    return;
   }
 
-  playKeySound();
+  if (pendingInputType === "deleteContentBackward" || domValue.length < previousValue.length) {
+    removeTypedCharacters(previousValue.length - domValue.length || 1);
+    return;
+  }
 
-  const entryIndex = state.typedEntries.length;
-  const expectedChar = state.currentParagraph.text[entryIndex];
-  state.typedEntries.push({
-    typed: event.key,
-    expected: expectedChar,
-    isCorrect: event.key === expectedChar
+  if (domValue.startsWith(previousValue) && domValue.length > previousValue.length) {
+    const appendedText = domValue.slice(previousValue.length);
+    appendedText.split("").forEach((char) => addTypedCharacter(char));
+    return;
+  }
+
+  // Mobile keyboards can replace the field content during autocorrect/composition.
+  // Rebuild from the longest shared prefix to keep the test aligned to the prompt.
+  let sharedPrefixLength = 0;
+  while (
+    sharedPrefixLength < previousValue.length &&
+    sharedPrefixLength < domValue.length &&
+    previousValue[sharedPrefixLength] === domValue[sharedPrefixLength]
+  ) {
+    sharedPrefixLength += 1;
+  }
+
+  state.typedEntries = state.typedEntries.slice(0, sharedPrefixLength);
+  const appendedText = domValue.slice(sharedPrefixLength);
+  appendedText.split("").forEach((char) => {
+    if (state.typedEntries.length < state.currentParagraph.text.length) {
+      const expectedChar = state.currentParagraph.text[state.typedEntries.length];
+      state.typedEntries.push({
+        typed: char,
+        expected: expectedChar,
+        isCorrect: char === expectedChar
+      });
+    }
   });
   syncTypedState();
+}
 
-  if (state.typedEntries.length === state.currentParagraph.text.length) {
-    finishTest();
+function getGuideCharacter() {
+  if (!state.currentParagraph) {
+    return "a";
   }
+
+  const nextChar = state.currentParagraph.text[state.typedEntries.length] ?? " ";
+  return nextChar.toLowerCase();
+}
+
+function getFingerForCharacter(char) {
+  return keyFingerMap[char] || keyFingerMap[char.toLowerCase()] || "right-index";
+}
+
+function getFingerProfile(fingerId) {
+  return fingerProfiles.find((profile) => profile.id === fingerId) || fingerProfiles[4];
+}
+
+function getDisplayKey(char) {
+  if (char === " ") {
+    return "Space";
+  }
+
+  if (char === "\n") {
+    return "Enter";
+  }
+
+  return char.toUpperCase();
+}
+
+function renderFingerGuide() {
+  elements.fingerLegend.innerHTML = fingerProfiles
+    .map((finger) => `
+      <div class="finger-pill" data-finger="${finger.id}" style="--finger-color:${finger.color}">
+        <span>${finger.label}</span>
+      </div>
+    `)
+    .join("");
+
+  elements.keyboardGuide.innerHTML = keyboardRows
+    .map((row) => `
+      <div class="keyboard-row">
+        ${row
+          .map(([value, label, width]) => {
+            const fingerId = getFingerForCharacter(value);
+            const finger = getFingerProfile(fingerId);
+            return `
+              <div
+                class="key-cap"
+                data-key="${value === '"' ? "&quot;" : escapeHtml(value)}"
+                data-finger="${fingerId}"
+                data-width="${width || "normal"}"
+                style="--finger-color:${finger.color}"
+              >
+                <strong>${label}</strong>
+                <span class="key-hint">${finger.label}</span>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    `)
+    .join("");
+}
+
+function updateFingerGuide() {
+  const nextChar = getGuideCharacter();
+  const fingerId = getFingerForCharacter(nextChar);
+  const finger = getFingerProfile(fingerId);
+
+  elements.nextKeyValue.textContent = getDisplayKey(nextChar);
+  elements.fingerNameValue.textContent = finger.label;
+
+  elements.fingerLegend.querySelectorAll(".finger-pill").forEach((pill) => {
+    pill.classList.toggle("active", pill.dataset.finger === fingerId);
+  });
+
+  elements.keyboardGuide.querySelectorAll(".key-cap").forEach((keyCap) => {
+    const isFingerMatch = keyCap.dataset.finger === fingerId;
+    const isKeyMatch = keyCap.dataset.key === nextChar;
+    keyCap.classList.toggle("finger-active", isFingerMatch);
+    keyCap.classList.toggle("active", isKeyMatch);
+  });
 }
 
 function finishTest() {
@@ -463,9 +702,8 @@ function initialize() {
   });
 
   elements.typingInput.addEventListener("keydown", handleTypingKeydown);
-  elements.typingInput.addEventListener("input", () => {
-    elements.typingInput.value = state.typedText;
-  });
+  elements.typingInput.addEventListener("beforeinput", handleBeforeInput);
+  elements.typingInput.addEventListener("input", handleTypingInput);
   elements.typingInput.addEventListener("paste", preventClipboardActions);
   elements.typingInput.addEventListener("copy", preventClipboardActions);
   elements.typingInput.addEventListener("cut", preventClipboardActions);
@@ -473,6 +711,9 @@ function initialize() {
 
   document.addEventListener("keydown", handleKeydown);
   document.addEventListener("contextmenu", preventClipboardActions);
+
+  renderFingerGuide();
+  updateFingerGuide();
 }
 
 initialize();
