@@ -7,142 +7,6 @@ const STORAGE_KEYS = {
   theme: "typing-test-theme"
 };
 
-const fingerProfiles = [
-  { id: "left-pinky", label: "Left Pinky", color: "#ff6b6b" },
-  { id: "left-ring", label: "Left Ring", color: "#f59f00" },
-  { id: "left-middle", label: "Left Middle", color: "#51cf66" },
-  { id: "left-index", label: "Left Index", color: "#339af0" },
-  { id: "right-index", label: "Right Index", color: "#845ef7" },
-  { id: "right-middle", label: "Right Middle", color: "#a61e4d" },
-  { id: "right-ring", label: "Right Ring", color: "#0b7285" },
-  { id: "right-pinky", label: "Right Pinky", color: "#5f3dc4" },
-  { id: "thumbs", label: "Thumbs", color: "#2f9e44" }
-];
-
-const keyFingerMap = {
-  "`": "left-pinky",
-  "1": "left-pinky",
-  "2": "left-ring",
-  "3": "left-middle",
-  "4": "left-index",
-  "5": "left-index",
-  "6": "right-index",
-  "7": "right-index",
-  "8": "right-middle",
-  "9": "right-ring",
-  "0": "right-pinky",
-  "-": "right-pinky",
-  "=": "right-pinky",
-  q: "left-pinky",
-  w: "left-ring",
-  e: "left-middle",
-  r: "left-index",
-  t: "left-index",
-  y: "right-index",
-  u: "right-index",
-  i: "right-middle",
-  o: "right-ring",
-  p: "right-pinky",
-  "[": "right-pinky",
-  "]": "right-pinky",
-  "\\": "right-pinky",
-  a: "left-pinky",
-  s: "left-ring",
-  d: "left-middle",
-  f: "left-index",
-  g: "left-index",
-  h: "right-index",
-  j: "right-index",
-  k: "right-middle",
-  l: "right-ring",
-  ";": "right-pinky",
-  "'": "right-pinky",
-  z: "left-pinky",
-  x: "left-ring",
-  c: "left-middle",
-  v: "left-index",
-  b: "left-index",
-  n: "right-index",
-  m: "right-index",
-  ",": "right-middle",
-  ".": "right-ring",
-  "/": "right-pinky",
-  " ": "thumbs"
-};
-
-const keyboardRows = [
-  [
-    { value: "`", label: "`" },
-    { value: "1", label: "1" },
-    { value: "2", label: "2" },
-    { value: "3", label: "3" },
-    { value: "4", label: "4" },
-    { value: "5", label: "5" },
-    { value: "6", label: "6" },
-    { value: "7", label: "7" },
-    { value: "8", label: "8" },
-    { value: "9", label: "9" },
-    { value: "0", label: "0" },
-    { value: "-", label: "-" },
-    { value: "=", label: "=" },
-    { value: "Backspace", label: "Back", width: "backspace", kind: "modifier" }
-  ],
-  [
-    { value: "Tab", label: "Tab", width: "tab", kind: "modifier" },
-    { value: "q", label: "Q" },
-    { value: "w", label: "W" },
-    { value: "e", label: "E" },
-    { value: "r", label: "R" },
-    { value: "t", label: "T" },
-    { value: "y", label: "Y" },
-    { value: "u", label: "U" },
-    { value: "i", label: "I" },
-    { value: "o", label: "O" },
-    { value: "p", label: "P" },
-    { value: "[", label: "[" },
-    { value: "]", label: "]" },
-    { value: "\\", label: "\\", width: "slash", kind: "modifier" }
-  ],
-  [
-    { value: "CapsLock", label: "Caps", width: "caps", kind: "modifier" },
-    { value: "a", label: "A" },
-    { value: "s", label: "S" },
-    { value: "d", label: "D" },
-    { value: "f", label: "F" },
-    { value: "g", label: "G" },
-    { value: "h", label: "H" },
-    { value: "j", label: "J" },
-    { value: "k", label: "K" },
-    { value: "l", label: "L" },
-    { value: ";", label: ";" },
-    { value: "'", label: "'" },
-    { value: "Enter", label: "Enter", width: "enter", kind: "modifier" }
-  ],
-  [
-    { value: "Shift", label: "Shift", width: "shift-left", kind: "modifier" },
-    { value: "z", label: "Z" },
-    { value: "x", label: "X" },
-    { value: "c", label: "C" },
-    { value: "v", label: "V" },
-    { value: "b", label: "B" },
-    { value: "n", label: "N" },
-    { value: "m", label: "M" },
-    { value: ",", label: "," },
-    { value: ".", label: "." },
-    { value: "/", label: "/" },
-    { value: "Shift", label: "Shift", width: "shift-right", kind: "modifier" }
-  ],
-  [
-    { value: "Control", label: "Ctrl", width: "ctrl", kind: "modifier" },
-    { value: "Meta", label: "Win", width: "meta", kind: "modifier" },
-    { value: "Alt", label: "Alt", width: "alt", kind: "modifier" },
-    { value: " ", label: "Space", width: "space" },
-    { value: "Alt", label: "Alt", width: "alt", kind: "modifier" },
-    { value: "Menu", label: "Fn", width: "meta", kind: "modifier" },
-    { value: "Control", label: "Ctrl", width: "ctrl", kind: "modifier" }
-  ]
-];
-
 const paragraphs = [
   { id: 1, difficulty: "easy", text: "Small daily habits often create the biggest improvements over time, especially when practice feels simple enough to repeat." },
   { id: 2, difficulty: "easy", text: "Reading clear words aloud can improve typing rhythm because your hands begin to follow a steady pattern." },
@@ -194,10 +58,6 @@ const elements = {
   paragraphCounter: document.getElementById("paragraphCounter"),
   paragraphDisplay: document.getElementById("paragraphDisplay"),
   typingInput: document.getElementById("typingInput"),
-  nextKeyValue: document.getElementById("nextKeyValue"),
-  fingerNameValue: document.getElementById("fingerNameValue"),
-  fingerLegend: document.getElementById("fingerLegend"),
-  keyboardGuide: document.getElementById("keyboardGuide"),
   finalWpm: document.getElementById("finalWpm"),
   finalAccuracy: document.getElementById("finalAccuracy"),
   finalErrors: document.getElementById("finalErrors"),
@@ -266,18 +126,7 @@ function chooseParagraph(difficulty) {
 function renderParagraph() {
   const chars = state.currentParagraph.text.split("");
   elements.paragraphDisplay.innerHTML = chars
-    .map((char) => {
-      const fingerId = getFingerForCharacter(char);
-      const finger = getFingerProfile(fingerId);
-      const displayChar = char === " " ? "&nbsp;" : escapeHtml(char);
-      const shortLabel = getFingerShortLabel(finger.label);
-      return `
-        <span style="--finger-color:${finger.color}" title="${finger.label}">
-          <span class="char-glyph">${displayChar}</span>
-          <small class="finger-tag">${shortLabel}</small>
-        </span>
-      `;
-    })
+    .map((char) => `<span>${char === " " ? "&nbsp;" : escapeHtml(char)}</span>`)
     .join("");
 
   const firstCharacter = elements.paragraphDisplay.querySelector("span");
@@ -324,8 +173,6 @@ function startNewTest(useExistingDifficulty = true) {
   elements.typingInput.value = "";
   elements.typingInput.maxLength = state.currentParagraph.text.length;
   renderParagraph();
-  renderFingerGuide();
-  updateFingerGuide();
   updateStats();
   switchScreen(elements.testScreen);
   window.requestAnimationFrame(() => elements.typingInput.focus());
@@ -415,7 +262,6 @@ function syncTypedState() {
   state.lastInputLength = state.typedEntries.length;
   elements.typingInput.value = state.typedText;
   updateCharacterStates();
-  updateFingerGuide();
   updateStats();
 }
 
@@ -560,105 +406,6 @@ function handleTypingInput() {
   syncTypedState();
 }
 
-function getGuideCharacter() {
-  if (!state.currentParagraph) {
-    return "a";
-  }
-
-  const nextChar = state.currentParagraph.text[state.typedEntries.length] ?? " ";
-  return nextChar.toLowerCase();
-}
-
-function getFingerForCharacter(char) {
-  return keyFingerMap[char] || keyFingerMap[char.toLowerCase()] || "right-index";
-}
-
-function getFingerProfile(fingerId) {
-  return fingerProfiles.find((profile) => profile.id === fingerId) || fingerProfiles[4];
-}
-
-function getFingerShortLabel(label) {
-  const map = {
-    "Left Pinky": "LP",
-    "Left Ring": "LR",
-    "Left Middle": "LM",
-    "Left Index": "LI",
-    "Right Index": "RI",
-    "Right Middle": "RM",
-    "Right Ring": "RR",
-    "Right Pinky": "RP",
-    "Thumbs": "TH"
-  };
-  return map[label] || label;
-}
-
-function getDisplayKey(char) {
-  if (char === " ") {
-    return "Space";
-  }
-
-  if (char === "\n") {
-    return "Enter";
-  }
-
-  return char.toUpperCase();
-}
-
-function renderFingerGuide() {
-  elements.fingerLegend.innerHTML = fingerProfiles
-    .map((finger) => `
-      <div class="finger-pill" data-finger="${finger.id}" style="--finger-color:${finger.color}">
-        <span>${finger.label}</span>
-      </div>
-    `)
-    .join("");
-
-  elements.keyboardGuide.innerHTML = keyboardRows
-    .map((row) => `
-      <div class="keyboard-row">
-        ${row
-          .map((key) => {
-            const fingerId = key.kind === "modifier" ? "thumbs" : getFingerForCharacter(key.value);
-            const finger = getFingerProfile(fingerId);
-            return `
-              <div
-                class="key-cap${key.kind === "modifier" ? " key-cap-modifier" : ""}"
-                data-key="${key.value === '"' ? "&quot;" : escapeHtml(key.value.toLowerCase())}"
-                data-finger="${fingerId}"
-                data-width="${key.width || "normal"}"
-                style="--finger-color:${finger.color}"
-              >
-                <strong>${key.label}</strong>
-                <span class="key-hint">${key.kind === "modifier" ? "Guide key" : finger.label}</span>
-              </div>
-            `;
-          })
-          .join("")}
-      </div>
-    `)
-    .join("");
-}
-
-function updateFingerGuide() {
-  const nextChar = getGuideCharacter();
-  const fingerId = getFingerForCharacter(nextChar);
-  const finger = getFingerProfile(fingerId);
-
-  elements.nextKeyValue.textContent = getDisplayKey(nextChar);
-  elements.fingerNameValue.textContent = finger.label;
-
-  elements.fingerLegend.querySelectorAll(".finger-pill").forEach((pill) => {
-    pill.classList.toggle("active", pill.dataset.finger === fingerId);
-  });
-
-  elements.keyboardGuide.querySelectorAll(".key-cap").forEach((keyCap) => {
-    const isFingerMatch = keyCap.dataset.finger === fingerId;
-    const isKeyMatch = keyCap.dataset.key === nextChar.toLowerCase();
-    keyCap.classList.toggle("finger-active", isFingerMatch);
-    keyCap.classList.toggle("active", isKeyMatch);
-  });
-}
-
 function finishTest() {
   if (!state.currentParagraph) {
     return;
@@ -789,9 +536,6 @@ function initialize() {
 
   document.addEventListener("keydown", handleKeydown);
   document.addEventListener("contextmenu", preventClipboardActions);
-
-  renderFingerGuide();
-  updateFingerGuide();
 }
 
 initialize();
