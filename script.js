@@ -72,23 +72,75 @@ const keyFingerMap = {
 
 const keyboardRows = [
   [
-    ["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"], ["5", "5"],
-    ["6", "6"], ["7", "7"], ["8", "8"], ["9", "9"], ["0", "0"],
-    ["-", "-"], ["=", "="]
+    { value: "`", label: "`" },
+    { value: "1", label: "1" },
+    { value: "2", label: "2" },
+    { value: "3", label: "3" },
+    { value: "4", label: "4" },
+    { value: "5", label: "5" },
+    { value: "6", label: "6" },
+    { value: "7", label: "7" },
+    { value: "8", label: "8" },
+    { value: "9", label: "9" },
+    { value: "0", label: "0" },
+    { value: "-", label: "-" },
+    { value: "=", label: "=" },
+    { value: "Backspace", label: "Back", width: "backspace", kind: "modifier" }
   ],
   [
-    ["q", "Q"], ["w", "W"], ["e", "E"], ["r", "R"], ["t", "T"],
-    ["y", "Y"], ["u", "U"], ["i", "I"], ["o", "O"], ["p", "P"]
+    { value: "Tab", label: "Tab", width: "tab", kind: "modifier" },
+    { value: "q", label: "Q" },
+    { value: "w", label: "W" },
+    { value: "e", label: "E" },
+    { value: "r", label: "R" },
+    { value: "t", label: "T" },
+    { value: "y", label: "Y" },
+    { value: "u", label: "U" },
+    { value: "i", label: "I" },
+    { value: "o", label: "O" },
+    { value: "p", label: "P" },
+    { value: "[", label: "[" },
+    { value: "]", label: "]" },
+    { value: "\\", label: "\\", width: "slash", kind: "modifier" }
   ],
   [
-    ["a", "A"], ["s", "S"], ["d", "D"], ["f", "F"], ["g", "G"],
-    ["h", "H"], ["j", "J"], ["k", "K"], ["l", "L"], [";", ";"], ["'", "'"]
+    { value: "CapsLock", label: "Caps", width: "caps", kind: "modifier" },
+    { value: "a", label: "A" },
+    { value: "s", label: "S" },
+    { value: "d", label: "D" },
+    { value: "f", label: "F" },
+    { value: "g", label: "G" },
+    { value: "h", label: "H" },
+    { value: "j", label: "J" },
+    { value: "k", label: "K" },
+    { value: "l", label: "L" },
+    { value: ";", label: ";" },
+    { value: "'", label: "'" },
+    { value: "Enter", label: "Enter", width: "enter", kind: "modifier" }
   ],
   [
-    ["z", "Z"], ["x", "X"], ["c", "C"], ["v", "V"], ["b", "B"],
-    ["n", "N"], ["m", "M"], [",", ","], [".", "."], ["/", "/"]
+    { value: "Shift", label: "Shift", width: "shift-left", kind: "modifier" },
+    { value: "z", label: "Z" },
+    { value: "x", label: "X" },
+    { value: "c", label: "C" },
+    { value: "v", label: "V" },
+    { value: "b", label: "B" },
+    { value: "n", label: "N" },
+    { value: "m", label: "M" },
+    { value: ",", label: "," },
+    { value: ".", label: "." },
+    { value: "/", label: "/" },
+    { value: "Shift", label: "Shift", width: "shift-right", kind: "modifier" }
   ],
-  [[" ", "Space", "space"]]
+  [
+    { value: "Control", label: "Ctrl", width: "ctrl", kind: "modifier" },
+    { value: "Meta", label: "Win", width: "meta", kind: "modifier" },
+    { value: "Alt", label: "Alt", width: "alt", kind: "modifier" },
+    { value: " ", label: "Space", width: "space" },
+    { value: "Alt", label: "Alt", width: "alt", kind: "modifier" },
+    { value: "Menu", label: "Fn", width: "meta", kind: "modifier" },
+    { value: "Control", label: "Ctrl", width: "ctrl", kind: "modifier" }
+  ]
 ];
 
 const paragraphs = [
@@ -539,19 +591,19 @@ function renderFingerGuide() {
     .map((row) => `
       <div class="keyboard-row">
         ${row
-          .map(([value, label, width]) => {
-            const fingerId = getFingerForCharacter(value);
+          .map((key) => {
+            const fingerId = key.kind === "modifier" ? "thumbs" : getFingerForCharacter(key.value);
             const finger = getFingerProfile(fingerId);
             return `
               <div
-                class="key-cap"
-                data-key="${value === '"' ? "&quot;" : escapeHtml(value)}"
+                class="key-cap${key.kind === "modifier" ? " key-cap-modifier" : ""}"
+                data-key="${key.value === '"' ? "&quot;" : escapeHtml(key.value.toLowerCase())}"
                 data-finger="${fingerId}"
-                data-width="${width || "normal"}"
+                data-width="${key.width || "normal"}"
                 style="--finger-color:${finger.color}"
               >
-                <strong>${label}</strong>
-                <span class="key-hint">${finger.label}</span>
+                <strong>${key.label}</strong>
+                <span class="key-hint">${key.kind === "modifier" ? "Guide key" : finger.label}</span>
               </div>
             `;
           })
@@ -575,7 +627,7 @@ function updateFingerGuide() {
 
   elements.keyboardGuide.querySelectorAll(".key-cap").forEach((keyCap) => {
     const isFingerMatch = keyCap.dataset.finger === fingerId;
-    const isKeyMatch = keyCap.dataset.key === nextChar;
+    const isKeyMatch = keyCap.dataset.key === nextChar.toLowerCase();
     keyCap.classList.toggle("finger-active", isFingerMatch);
     keyCap.classList.toggle("active", isKeyMatch);
   });
