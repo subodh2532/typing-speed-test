@@ -266,7 +266,18 @@ function chooseParagraph(difficulty) {
 function renderParagraph() {
   const chars = state.currentParagraph.text.split("");
   elements.paragraphDisplay.innerHTML = chars
-    .map((char) => `<span>${char === " " ? "&nbsp;" : escapeHtml(char)}</span>`)
+    .map((char) => {
+      const fingerId = getFingerForCharacter(char);
+      const finger = getFingerProfile(fingerId);
+      const displayChar = char === " " ? "&nbsp;" : escapeHtml(char);
+      const shortLabel = getFingerShortLabel(finger.label);
+      return `
+        <span style="--finger-color:${finger.color}" title="${finger.label}">
+          <span class="char-glyph">${displayChar}</span>
+          <small class="finger-tag">${shortLabel}</small>
+        </span>
+      `;
+    })
     .join("");
 
   const firstCharacter = elements.paragraphDisplay.querySelector("span");
@@ -564,6 +575,21 @@ function getFingerForCharacter(char) {
 
 function getFingerProfile(fingerId) {
   return fingerProfiles.find((profile) => profile.id === fingerId) || fingerProfiles[4];
+}
+
+function getFingerShortLabel(label) {
+  const map = {
+    "Left Pinky": "LP",
+    "Left Ring": "LR",
+    "Left Middle": "LM",
+    "Left Index": "LI",
+    "Right Index": "RI",
+    "Right Middle": "RM",
+    "Right Ring": "RR",
+    "Right Pinky": "RP",
+    "Thumbs": "TH"
+  };
+  return map[label] || label;
 }
 
 function getDisplayKey(char) {

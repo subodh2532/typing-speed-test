@@ -166,7 +166,8 @@ h2 {
 .input-block,
 .prompt-card,
 .history-panel,
-.coach-panel {
+.coach-panel,
+.training-main {
   display: grid;
   gap: 12px;
 }
@@ -401,6 +402,13 @@ textarea:focus {
   transition: width 0.1s linear;
 }
 
+.training-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
+  gap: 22px;
+  align-items: start;
+}
+
 .prompt-card {
   padding: 24px;
   border-radius: 24px;
@@ -425,6 +433,12 @@ textarea:focus {
 
 .paragraph-display span {
   position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 0 1px;
+  border-radius: 8px;
 }
 
 .paragraph-display span.correct {
@@ -447,8 +461,36 @@ textarea:focus {
   text-decoration-color: var(--incorrect);
 }
 
+.finger-tag {
+  display: block;
+  min-width: 18px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  font-size: 0.5rem;
+  font-family: "Aptos", "Segoe UI Variable", "Trebuchet MS", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: #3f3a2d;
+  background: color-mix(in srgb, var(--finger-color, #ddd) 26%, white);
+  border: 1px solid color-mix(in srgb, var(--finger-color, #ddd) 45%, #d2cab9);
+}
+
+.paragraph-display span.current .finger-tag {
+  background: color-mix(in srgb, var(--finger-color, #ddd) 40%, white);
+  transform: translateY(-1px);
+}
+
+.paragraph-display span.correct .finger-tag {
+  color: #0f6245;
+}
+
+.paragraph-display span.incorrect .finger-tag {
+  color: #9f2631;
+}
+
 .input-block {
-  margin-top: 22px;
+  margin-top: 8px;
 }
 
 textarea {
@@ -700,6 +742,10 @@ textarea {
   .coach-header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .training-layout {
+    grid-template-columns: 1fr;
   }
 
   .history-item {
