@@ -421,6 +421,7 @@ textarea:focus {
   line-height: 1.9;
   word-break: normal;
   overflow-wrap: normal;
+  color: var(--text);
 }
 
 .word-group {
@@ -430,15 +431,20 @@ textarea:focus {
 
 .paragraph-display .char-cell {
   position: relative;
+  display: inline-block;
+  min-width: 0.55ch;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
 }
 
 .paragraph-display .char-cell.correct {
   color: var(--correct);
+  background: rgba(21, 154, 109, 0.08);
 }
 
 .paragraph-display .char-cell.incorrect {
   color: var(--incorrect);
-  background: rgba(222, 60, 75, 0.08);
+  background: rgba(222, 60, 75, 0.14);
 }
 
 .paragraph-display .char-cell.current {
@@ -450,6 +456,10 @@ textarea:focus {
 
 .paragraph-display .char-cell.current.incorrect {
   text-decoration-color: var(--incorrect);
+}
+
+.paragraph-display .char-cell.current.correct {
+  text-decoration-color: var(--correct);
 }
 
 .input-block {

@@ -240,7 +240,7 @@ function updateCharacterStates() {
   let mistakes = 0;
 
   spans.forEach((span, index) => {
-    span.className = "";
+    span.className = "char-cell";
     const entry = state.typedEntries[index];
 
     if (!entry) {
@@ -469,9 +469,23 @@ function formatErrorChar(char) {
 }
 
 function renderErrorSummary() {
-  const errors = state.typedEntries
-    .map((entry, index) => ({ ...entry, index }))
-    .filter((entry) => !entry.isCorrect);
+  const expectedWords = state.currentParagraph.text.trim().split(/\s+/);
+  const typedWords = state.typedText.trim().split(/\s+/).filter(Boolean);
+  const maxWords = Math.max(expectedWords.length, typedWords.length);
+  const errors = [];
+
+  for (let index = 0; index < maxWords; index += 1) {
+    const expectedWord = expectedWords[index] || "";
+    const typedWord = typedWords[index] || "";
+
+    if (expectedWord !== typedWord) {
+      errors.push({
+        index,
+        expected: expectedWord,
+        typed: typedWord
+      });
+    }
+  }
 
   if (errors.length === 0) {
     elements.errorSummaryList.innerHTML = '<div class="error-empty">Perfect run. No typing mistakes in this test.</div>';
