@@ -58,6 +58,7 @@ const elements = {
   paragraphCounter: document.getElementById("paragraphCounter"),
   paragraphDisplay: document.getElementById("paragraphDisplay"),
   typingInput: document.getElementById("typingInput"),
+  errorSummaryList: document.getElementById("errorSummaryList"),
   finalWpm: document.getElementById("finalWpm"),
   finalAccuracy: document.getElementById("finalAccuracy"),
   finalErrors: document.getElementById("finalErrors"),
@@ -124,12 +125,19 @@ function chooseParagraph(difficulty) {
 }
 
 function renderParagraph() {
-  const chars = state.currentParagraph.text.split("");
-  elements.paragraphDisplay.innerHTML = chars
-    .map((char) => `<span>${char === " " ? "&nbsp;" : escapeHtml(char)}</span>`)
+  const tokens = state.currentParagraph.text.match(/\S+\s*|\s+/g) || [];
+  elements.paragraphDisplay.innerHTML = tokens
+    .map((token) => `
+      <span class="word-group">
+        ${token
+          .split("")
+          .map((char) => `<span class="char-cell">${char === " " ? "&nbsp;" : escapeHtml(char)}</span>`)
+          .join("")}
+      </span>
+    `)
     .join("");
 
-  const firstCharacter = elements.paragraphDisplay.querySelector("span");
+  const firstCharacter = elements.paragraphDisplay.querySelector(".char-cell");
   if (firstCharacter) {
     firstCharacter.classList.add("current");
   }
@@ -227,7 +235,7 @@ function updateStats() {
 }
 
 function updateCharacterStates() {
-  const spans = elements.paragraphDisplay.querySelectorAll("span");
+  const spans = elements.paragraphDisplay.querySelectorAll(".char-cell");
   let correctCount = 0;
   let mistakes = 0;
 
@@ -442,9 +450,52 @@ function finishTest() {
   elements.finalErrors.textContent = String(result.mistakes);
   elements.finalTime.textContent = `${result.timeTaken}s`;
 
+  renderErrorSummary();
   renderHistory();
   renderLandingStats();
   switchScreen(elements.resultScreen);
+}
+
+function formatErrorChar(char) {
+  if (char === " ") {
+    return "space";
+  }
+
+  if (!char) {
+    return "missing";
+  }
+
+  return char;
+}
+
+function renderErrorSummary() {
+  const errors = state.typedEntries
+    .map((entry, index) => ({ ...entry, index }))
+    .filter((entry) => !entry.isCorrect);
+
+  if (errors.length === 0) {
+    elements.errorSummaryList.innerHTML = '<div class="error-empty">Perfect run. No typing mistakes in this test.</div>';
+    return;
+  }
+
+  elements.errorSummaryList.innerHTML = errors
+    .slice(0, 12)
+    .map((entry) => `
+      <article class="error-item">
+        <div>
+          <span class="error-chip">#${entry.index + 1}</span>
+        </div>
+        <div>
+          <span>Expected</span>
+          <strong>${escapeHtml(formatErrorChar(entry.expected))}</strong>
+        </div>
+        <div>
+          <span>Typed</span>
+          <strong>${escapeHtml(formatErrorChar(entry.typed))}</strong>
+        </div>
+      </article>
+    `)
+    .join("");
 }
 
 function renderHistory() {
